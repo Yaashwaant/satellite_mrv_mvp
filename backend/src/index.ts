@@ -7,6 +7,8 @@ import { projects } from './routes/projects';
 import { parcels } from './routes/parcels';
 import { users } from './routes/users';
 import { stac } from './routes/stac';
+import { auth } from './routes/auth';
+import { requireAuth, requireRole } from './auth/middleware';
 
 dotenv.config();
 
@@ -36,6 +38,7 @@ app.use('/projects', projects);
 app.use('/parcels', parcels);
 app.use('/users', users);
 app.use('/stac', stac);
+app.use('/auth', auth);
 
 const port = env.PORT;
 app.listen(port, () => {

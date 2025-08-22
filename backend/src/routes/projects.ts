@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { prisma } from '../prisma';
 import { z } from 'zod';
+import { requireAuth, requireRole } from '../auth/middleware';
 
 export const projects = Router();
 
@@ -19,7 +20,7 @@ const createProjectSchema = z.object({
 	message: 'Either ownerId or ownerEmail is required',
 });
 
-projects.post('/', async (req, res) => {
+projects.post('/', requireAuth, requireRole(['ADMIN', 'PROJECT_DEVELOPER']), async (req, res) => {
 	try {
 		const parsed = createProjectSchema.parse(req.body ?? {});
 

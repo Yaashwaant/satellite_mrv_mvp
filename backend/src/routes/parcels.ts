@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { prisma } from '../prisma';
 import { z } from 'zod';
+import { requireAuth, requireRole } from '../auth/middleware';
 
 export const parcels = Router();
 
@@ -16,7 +17,7 @@ const createParcelSchema = z.object({
 	geometry: z.any().optional(),
 });
 
-parcels.post('/', async (req, res) => {
+parcels.post('/', requireAuth, requireRole(['ADMIN', 'PROJECT_DEVELOPER']), async (req, res) => {
 	try {
 		const parsed = createParcelSchema.parse(req.body ?? {});
 		const project = await prisma.project.findUnique({ where: { id: parsed.projectId } });
