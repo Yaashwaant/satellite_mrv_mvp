@@ -1,0 +1,17 @@
+{
+  "users": [
+    {
+      "id": "1755861151275",
+      "name": "Test User",
+      "email": "test@example.com"
+    }
+  ],
+  "projects": [],
+  "parcels": [],
+  "metrics": [],
+  "estimates": [],
+  "reports": [],
+  "verifications": [],
+  "images": [],
+  "logs": []
+}

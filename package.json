@@ -1,0 +1,26 @@
+{
+  "name": "satellite_mrv_mvp",
+  "version": "1.0.0",
+  "description": "Backend: FastAPI service with a STAC search endpoint.",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "npm --prefix backend run dev",
+    "build": "npm --prefix backend run build",
+    "start": "npm --prefix backend run start"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Yaashwaant/satellite_mrv_mvp.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Yaashwaant/satellite_mrv_mvp/issues"
+  },
+  "homepage": "https://github.com/Yaashwaant/satellite_mrv_mvp#readme"
+}

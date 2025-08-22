@@ -2,6 +2,7 @@
 import express from 'express';
 import cors from 'cors';
 import { env } from './config/env';
+import { jsonDb } from './db/jsonDb';
 
 dotenv.config();
 
@@ -11,6 +12,20 @@ app.use(express.json());
 
 app.get('/health', (_req, res) => {
   res.json({ status: 'ok' });
+});
+
+app.get('/users', (_req, res) => {
+  const users = jsonDb.getUsers();
+  res.json(users);
+});
+
+app.post('/users', (req, res) => {
+  const user = req.body ?? {};
+  const created = jsonDb.addUser({
+    id: Date.now().toString(),
+    ...user,
+  });
+  res.status(201).json(created);
 });
 
 const port = env.PORT;
