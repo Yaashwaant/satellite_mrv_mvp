@@ -5,6 +5,7 @@ import { env } from './config/env';
 import { jsonDb } from './db/jsonDb';
 import { projects } from './routes/projects';
 import { parcels } from './routes/parcels';
+import { users } from './routes/users';
 
 dotenv.config();
 
@@ -32,6 +33,7 @@ app.post('/users', (req, res) => {
 
 app.use('/projects', projects);
 app.use('/parcels', parcels);
+app.use('/users', users);
 
 const port = env.PORT;
 app.listen(port, () => {
