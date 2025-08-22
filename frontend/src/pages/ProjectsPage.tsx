@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Alert, Button, Paper, Stack, TextField, Typography } from '@mui/material';
 import { useState } from 'react';
 import api from '../lib/api';
+import { useAuth, hasRole } from '../lib/auth';
 
 type Project = {
 	id: string;
@@ -12,6 +13,7 @@ type Project = {
 
 export default function ProjectsPage() {
 	const qc = useQueryClient();
+	const { role } = useAuth();
 	const projects = useQuery<Project[]>({
 		queryKey: ['projects'],
 		queryFn: async () => (await api.get('/projects')).data,
@@ -28,6 +30,7 @@ export default function ProjectsPage() {
 	return (
 		<Stack spacing={2}>
 			<Typography variant="h5">Projects</Typography>
+			{hasRole(role, ['ADMIN', 'PROJECT_DEVELOPER']) && (
 			<Paper sx={{ p: 2 }}>
 				<Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
 					<TextField label="Name" value={name} onChange={(e) => setName(e.target.value)} fullWidth />
@@ -36,6 +39,7 @@ export default function ProjectsPage() {
 				</Stack>
 				{createProject.isError && <Alert severity="error">Failed to create project</Alert>}
 			</Paper>
+			)}
 			<Stack spacing={1}>
 				{projects.data?.map((p) => (
 					<Paper key={p.id} sx={{ p: 2 }}>

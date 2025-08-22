@@ -2,11 +2,13 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Alert, Button, Paper, Stack, TextField, Typography } from '@mui/material';
 import { useState } from 'react';
 import api from '../lib/api';
+import { useAuth, hasRole } from '../lib/auth';
 
 type Parcel = { id: string; name?: string; projectId: string; areaHa?: number };
 
 export default function ParcelsPage() {
 	const qc = useQueryClient();
+	const { role } = useAuth();
 	const parcels = useQuery<Parcel[]>({
 		queryKey: ['parcels'],
 		queryFn: async () => (await api.get('/parcels')).data,
@@ -24,6 +26,7 @@ export default function ParcelsPage() {
 	return (
 		<Stack spacing={2}>
 			<Typography variant="h5">Parcels</Typography>
+			{hasRole(role, ['ADMIN', 'PROJECT_DEVELOPER']) && (
 			<Paper sx={{ p: 2 }}>
 				<Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
 					<TextField label="Project ID" value={projectId} onChange={(e) => setProjectId(e.target.value)} fullWidth />
@@ -33,6 +36,7 @@ export default function ParcelsPage() {
 				</Stack>
 				{createParcel.isError && <Alert severity="error">Failed to create parcel</Alert>}
 			</Paper>
+			)}
 			<Stack spacing={1}>
 				{parcels.data?.map((p) => (
 					<Paper key={p.id} sx={{ p: 2 }}>

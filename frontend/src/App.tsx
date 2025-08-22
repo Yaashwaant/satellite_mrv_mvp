@@ -3,8 +3,11 @@ import { Link, Route, Routes } from 'react-router-dom';
 import ProjectsPage from './pages/ProjectsPage';
 import ParcelsPage from './pages/ParcelsPage';
 import StacPage from './pages/StacPage';
+import LoginPage from './pages/LoginPage';
+import { useAuth, hasRole } from './lib/auth';
 
 export default function App() {
+	const { role, logout } = useAuth();
 	return (
 		<Box>
 			<AppBar position="static">
@@ -13,6 +16,12 @@ export default function App() {
 					<MuiLink component={Link} to="/" color="inherit" sx={{ mr: 2 }}>Projects</MuiLink>
 					<MuiLink component={Link} to="/parcels" color="inherit" sx={{ mr: 2 }}>Parcels</MuiLink>
 					<MuiLink component={Link} to="/stac" color="inherit">STAC</MuiLink>
+					<Box sx={{ flexGrow: 1 }} />
+					{role ? (
+						<Button color="inherit" onClick={logout}>Logout ({role})</Button>
+					) : (
+						<MuiLink component={Link} to="/login" color="inherit">Login</MuiLink>
+					)}
 				</Toolbar>
 			</AppBar>
 			<Container sx={{ mt: 3 }}>
@@ -20,6 +29,7 @@ export default function App() {
 					<Route path="/" element={<ProjectsPage />} />
 					<Route path="/parcels" element={<ParcelsPage />} />
 					<Route path="/stac" element={<StacPage />} />
+					<Route path="/login" element={<LoginPage />} />
 				</Routes>
 			</Container>
 		</Box>
