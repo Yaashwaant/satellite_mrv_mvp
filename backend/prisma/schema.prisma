@@ -7,9 +7,228 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum UserRole {
+  LANDOWNER
+  AUDITOR
+  PROJECT_DEVELOPER
+  ADMIN
+}
+
+enum ProjectStatus {
+  DRAFT
+  ACTIVE
+  VERIFICATION
+  ISSUED
+  ARCHIVED
+}
+
+enum Provider {
+  SENTINEL_2
+  LANDSAT_8
+  LANDSAT_9
+  OTHER
+}
+
+enum MetricType {
+  NDVI
+  EVI
+  LAI
+  LC_CLASS
+  BIOMASS
+  CUSTOM
+}
+
+enum Method {
+  IPCC_TIER1
+  IPCC_TIER2
+  ML_MODEL
+  OTHER
+}
+
+enum ReportStandard {
+  GOLD_STANDARD
+  VERRA
+}
+
+enum ReportStatus {
+  GENERATED
+  SUBMITTED
+  APPROVED
+  REJECTED
+}
+
+enum VerificationStatus {
+  PENDING
+  IN_REVIEW
+  APPROVED
+  REJECTED
+}
+
+enum ProjectMemberRole {
+  OWNER
+  COLLABORATOR
+  AUDITOR
+}
+
 model User {
   id        String   @id @default(uuid())
   email     String   @unique
   name      String?
+  role      UserRole @default(LANDOWNER)
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  projectMemberships ProjectMember[]
+  reports            Report[]
+  verifications      Verification[]
+  auditLogs          AuditLog[]
+  Project            Project[]
+}
+
+model Project {
+  id          String        @id @default(uuid())
+  name        String
+  description String?
+  ownerId     String
+  status      ProjectStatus @default(DRAFT)
+  startDate   DateTime?
+  endDate     DateTime?
+  boundary    Json?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  owner     User            @relation(fields: [ownerId], references: [id])
+  parcels   Parcel[]
+  members   ProjectMember[]
+  reports   Report[]
+  estimates Estimate[]
+
+  @@index([ownerId])
+}
+
+model ProjectMember {
+  projectId String
+  userId    String
+  role      ProjectMemberRole @default(COLLABORATOR)
+
+  project Project @relation(fields: [projectId], references: [id])
+  user    User    @relation(fields: [userId], references: [id])
+
+  @@id([projectId, userId])
+}
+
+model Parcel {
+  id        String   @id @default(uuid())
+  projectId String
+  name      String?
+  areaHa    Decimal?
+  geometry  Json?
+  createdAt DateTime @default(now())
+
+  project   Project       @relation(fields: [projectId], references: [id])
+  metrics   Metric[]
+  estimates Estimate[]
+  images    ParcelImage[]
+
+  @@index([projectId])
+}
+
+model SatelliteImage {
+  id         String   @id @default(uuid())
+  provider   Provider
+  acquiredAt DateTime
+  footprint  Json?
+  url        String
+  cloudCover Float?
+  createdAt  DateTime @default(now())
+
+  parcels ParcelImage[]
+}
+
+model ParcelImage {
+  parcelId String
+  imageId  String
+
+  parcel Parcel         @relation(fields: [parcelId], references: [id])
+  image  SatelliteImage @relation(fields: [imageId], references: [id])
+
+  @@id([parcelId, imageId])
+}
+
+model Metric {
+  id         String     @id @default(uuid())
+  parcelId   String
+  observedAt DateTime
+  type       MetricType
+  value      Decimal?
+  data       Json?
+
+  parcel Parcel @relation(fields: [parcelId], references: [id])
+
+  @@index([parcelId, observedAt])
+}
+
+model Estimate {
+  id           String   @id @default(uuid())
+  parcelId     String
+  method       Method
+  valueTonCO2e Decimal
+  uncertainty  Float?
+  periodStart  DateTime
+  periodEnd    DateTime
+  metadata     Json?
+  createdAt    DateTime @default(now())
+
+  parcel    Parcel   @relation(fields: [parcelId], references: [id])
+  Project   Project? @relation(fields: [projectId], references: [id])
+  projectId String?
+
+  @@index([parcelId, periodStart, periodEnd])
+}
+
+model Report {
+  id          String         @id @default(uuid())
+  projectId   String
+  standard    ReportStandard
+  status      ReportStatus   @default(GENERATED)
+  version     Int            @default(1)
+  generatedAt DateTime       @default(now())
+  url         String?
+  submittedAt DateTime?
+  metadata    Json?
+
+  project       Project        @relation(fields: [projectId], references: [id])
+  verifications Verification[]
+  User          User?          @relation(fields: [userId], references: [id])
+  userId        String?
+
+  @@index([projectId])
+}
+
+model Verification {
+  id        String             @id @default(uuid())
+  reportId  String
+  auditorId String
+  status    VerificationStatus @default(PENDING)
+  comments  String?
+  createdAt DateTime           @default(now())
+
+  report  Report @relation(fields: [reportId], references: [id])
+  auditor User   @relation(fields: [auditorId], references: [id])
+
+  @@index([reportId, auditorId])
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  userId     String?
+  action     String
+  entityType String
+  entityId   String
+  metadata   Json?
+  createdAt  DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id])
+
+  @@index([entityType, entityId])
 }

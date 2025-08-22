@@ -3,6 +3,8 @@ import express from 'express';
 import cors from 'cors';
 import { env } from './config/env';
 import { jsonDb } from './db/jsonDb';
+import { projects } from './routes/projects';
+import { parcels } from './routes/parcels';
 
 dotenv.config();
 
@@ -27,6 +29,9 @@ app.post('/users', (req, res) => {
   });
   res.status(201).json(created);
 });
+
+app.use('/projects', projects);
+app.use('/parcels', parcels);
 
 const port = env.PORT;
 app.listen(port, () => {
